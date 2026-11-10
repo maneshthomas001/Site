@@ -1,0 +1,18 @@
+import {cp, mkdir, readFile, writeFile, rm} from 'node:fs/promises';
+import {renderMetadata,embedContent} from '../share.js';
+import {previewImage} from './preview-image.mjs';
+await rm('dist',{recursive:true,force:true});
+await mkdir('dist',{recursive:true});
+for(const file of ['app.js','styles.css','content.json','editor.js','share.js','zip.js']) await cp(file,`dist/${file}`);
+await cp('public','dist',{recursive:true});
+const config = JSON.parse(await readFile('content.json','utf8'));
+if(process.env.SITE_URL) config.siteUrl=process.env.SITE_URL;
+await writeFile('dist/content.json',JSON.stringify(config,null,2)+'\n');
+const html = await readFile('index.html','utf8');
+const escape=value=>String(value||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const date=new Intl.DateTimeFormat('en-GB',{timeZone:config.timeZone,dateStyle:'long',timeStyle:'short'}).format(new Date(config.dateTime));
+const fallback=`<noscript><div class="no-js"><h1>${escape(config.partnerOne)} &amp; ${escape(config.partnerTwo)}</h1><p>${escape(config.heroMessage)}</p><p>${escape(date)}<br>${escape(config.venue)}</p><a href="${escape(config.mapUrl)}">View location</a></div></noscript>`;
+await writeFile('dist/index.html',embedContent(renderMetadata(html,config).replace(/<noscript>[\s\S]*?<\/noscript>/,fallback),config));
+await writeFile('dist/.nojekyll','');
+await previewImage(config,'dist/art/social-preview.png');
+console.log('Built static invitation in dist/');

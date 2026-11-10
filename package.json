@@ -1,0 +1,16 @@
+{
+  "name": "manesh-and-maji-invitation",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/serve.mjs",
+    "build": "node scripts/build.mjs",
+    "preview": "node scripts/serve.mjs dist",
+    "test": "node tests/smoke.cjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1",
+    "sharp": "^0.34.5"
+  }
+}
